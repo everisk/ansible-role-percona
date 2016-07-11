@@ -1,0 +1,48 @@
+---
+- name: Assert that prerequisites exist
+  tags: percona-release
+  assert:
+    that:
+      - percona_pkg is defined
+      - percona_ver is defined
+      - percona_rel is defined
+      - percona_baseurl is defined
+
+- name: Execute mktemp
+  tags: percona-release
+  command: mktemp -u --suffix .rpm
+  register: percona_mktemp
+
+- name: Create temporary package
+  tags: percona-release
+  get_url: url={{ percona_fetch }}
+           dest={{ percona_mktemp.stdout }}
+  register: percona_get_url
+  when: percona_mktemp|success
+
+- name: Install percona-release
+  tags: percona-release
+  yum: name={{ item }}
+       state=present
+  register: percona_yum
+  with_items: "{{ percona_mktemp.stdout }}"
+  when: percona_get_url|success
+
+- name: Configure percona-release.repo
+  tags: percona-release
+  template: src={{ item.src }}
+            dest={{ item.dst }}
+            owner=root
+            group=root
+            mode=0644
+  with_items:
+    - { src: percona-release.repo.j2, dst: /etc/yum.repos.d/percona-release.repo }
+  when: percona_yum|success
+
+- name: Erase temporary package
+  tags: percona-release
+  file: path={{ percona_mktemp.stdout }}
+        state=absent
+  when:
+    - percona_mktemp|success
+    - percona_yum|success
