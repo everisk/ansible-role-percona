@@ -8,41 +8,46 @@
       - percona_rel is defined
       - percona_baseurl is defined
 
-- name: Execute mktemp
+- name: Generate random package name
   tags: percona-release
   command: mktemp -u --suffix .rpm
   register: percona_mktemp
 
-- name: Create temporary package
+- name: Fetch {{ percona_pkg }} to temporary destination
   tags: percona-release
-  get_url: url={{ percona_fetch }}
-           dest={{ percona_mktemp.stdout }}
+  get_url:
+    url: "{{ percona_fetch }}"
+    dest: "{{ percona_mktemp.stdout }}"
   register: percona_get_url
   when: percona_mktemp|success
 
-- name: Install percona-release
+- name: Ensure that the {{ percona_pkg }} package is installed
   tags: percona-release
-  yum: name={{ item }}
-       state=present
+  yum:
+    name: "{{ item }}"
+    state: present
   register: percona_yum
   with_items: "{{ percona_mktemp.stdout }}"
   when: percona_get_url|success
 
-- name: Configure percona-release.repo
+- name: Applying {{ percona_pkg }} configurations
   tags: percona-release
-  template: src={{ item.src }}
-            dest={{ item.dst }}
-            owner=root
-            group=root
-            mode=0644
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    owner: root
+    group: root
+    mode: 0644
   with_items:
     - { src: percona-release.repo.j2, dst: /etc/yum.repos.d/percona-release.repo }
   when: percona_yum|success
 
-- name: Erase temporary package
+- name: Prune temporary package from the filesystem
   tags: percona-release
-  file: path={{ percona_mktemp.stdout }}
-        state=absent
+  file:
+    path: "{{ percona_mktemp.stdout }}"
+    state: absent
   when:
     - percona_mktemp|success
     - percona_yum|success
+...
