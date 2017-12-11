@@ -14,9 +14,9 @@ Available variables are listed below, along with default values:
 
     percona_pkg: percona-release
     percona_ver: 0.1
-    percona_rel: 3
+    percona_rel: 4
     percona_arch: noarch
-    percona_baseurl: "https://www.percona.com/redir/downloads/{{ percona_pkg }}/redhat/latest"
+    percona_baseurl: "https://www.percona.com/redir/downloads/{{ percona_pkg }}/redhat/{{ percona_ver }}-{{ percona_rel }}"
     percona_release: "{{ percona_pkg }}-{{ percona_ver }}-{{ percona_rel }}"
     percona_fetch: "{{ percona_baseurl }}/{{ percona_release }}.{{ percona_arch }}.rpm"
     percona_repos:
@@ -47,7 +47,7 @@ None
 
 ## License
 
-BSD
+GPLv3
 
 ## Author Information
 
