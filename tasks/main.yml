@@ -1,37 +1,41 @@
 ---
-- name: Assert that the prerequisites are defined
+- name: Attempting to generate temporary file
   tags: percona
-  assert:
-    that:
-      - percona_pkg is defined
-      - percona_ver is defined
-      - percona_rel is defined
-      - percona_baseurl is defined
+  tempfile:
+    prefix: percona.
+    state: file
+    suffix: .rpm
+  register: percona_tempfile
 
-- name: Generating temporary filename via mktemp
-  tags: percona
-  command: mktemp -u --suffix .rpm
-  register: percona_mktemp
-
-- name: Downloading package to temporary location
+- name: Attempting to download package to temporary location
   tags: percona
   get_url:
-    dest: "{{ percona_mktemp.stdout }}"
+    dest: "{{ percona_tempfile.path }}"
+    force: yes
     url: "{{ percona_fetch }}"
   register: percona_get_url
-  when: percona_mktemp|success
+  when: percona_tempfile is success
 
-- name: Ensure that the percona-release package is installed
+- name: Ensure that the {{ percona_pkg }} package is installed
   tags: percona
   become: true
   yum:
     name: "{{ item }}"
     state: present
   register: percona_yum
-  with_items: "{{ percona_mktemp.stdout }}"
-  when: percona_get_url|success
+  with_items: "{{ percona_tempfile.path }}"
+  when: percona_get_url is success
 
-- name: Applying percona-release.repo configurations
+- name: Attempting to purge temporary package from the filesystem
+  tags: percona
+  file:
+    path: "{{ percona_tempfile.path }}"
+    state: absent
+  when:
+    - percona_tempfile is success
+    - percona_yum is success
+
+- name: Attempting to overlay percona repository configurations
   tags: percona
   become: true
   template:
@@ -42,21 +46,26 @@
     mode: 0644
   with_items:
     - { src: percona-release.repo.j2, dst: /etc/yum.repos.d/percona-release.repo }
-  when: percona_yum|success
+  when: percona_yum is success
 
-- name: Ensure that the Percona GPG keys are installed
+- name: Ensure that the percona gpg keys are installed
   tags: percona
   become: true
   rpm_key:
     key: /etc/pki/rpm-gpg/RPM-GPG-KEY-Percona
     state: present
+  when: percona_yum is success
 
-- name: Purging temporary package from filesystem
+- name: Ensure that the required percona packages are installed
   tags: percona
-  file:
-    path: "{{ percona_mktemp.stdout }}"
-    state: absent
+  become: true
+  yum:
+    disablerepo: "{{ percona_disablerepo|join(',') }}"
+    enablerepo: "{{ percona_enablerepo|join(',') }}"
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ percona_packages }}"
   when:
-    - percona_mktemp|success
-    - percona_yum|success
+    - percona_packages|length > 0
+    - percona_yum is success
 ...

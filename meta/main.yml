@@ -4,15 +4,11 @@ galaxy_info:
   author: tkimball83
   description: RHEL/CentOS - Percona RPM repository
   license: GPLv3
-  min_ansible_version: 2.4
+  min_ansible_version: 2.5
   platforms:
     - name: EL
       versions:
-        - 5
-        - 6
-        - 7
+        - all
   galaxy_tags:
-    - packaging
     - percona
-    - system
 ...
