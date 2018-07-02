@@ -1,6 +1,7 @@
 ---
 dependencies: []
 galaxy_info:
+  role_name: percona
   author: tkimball83
   description: RHEL/CentOS - Percona RPM repository
   license: GPLv3
