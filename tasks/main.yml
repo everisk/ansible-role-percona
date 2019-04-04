@@ -20,10 +20,9 @@
   tags: percona
   become: true
   yum:
-    name: "{{ item }}"
+    name: "{{ percona_tempfile.path }}"
     state: present
   register: percona_yum
-  with_items: "{{ percona_tempfile.path }}"
   when: percona_get_url is success
 
 - name: Attempting to purge temporary package from the filesystem
