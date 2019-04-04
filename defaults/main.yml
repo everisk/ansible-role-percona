@@ -3,7 +3,8 @@ percona_arch: noarch
 percona_baseurl: "https://repo.percona.com/yum"
 percona_disablerepo: []
 percona_enablerepo: []
-percona_fetch: "{{ percona_baseurl }}/{{ percona_release }}.{{ percona_arch }}.rpm"
+percona_fetch: >-
+  {{ percona_baseurl }}/{{ percona_release }}.{{ percona_arch }}.rpm
 percona_packages: []
 percona_pkg: percona-release
 percona_rel: 9

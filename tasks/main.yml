@@ -11,7 +11,7 @@
   tags: percona
   get_url:
     dest: "{{ percona_tempfile.path }}"
-    force: yes
+    force: true
     url: "{{ percona_fetch }}"
   register: percona_get_url
   when: percona_tempfile is success
@@ -45,7 +45,8 @@
     group: root
     mode: 0644
   with_items:
-    - { src: percona-release.repo.j2, dst: /etc/yum.repos.d/percona-release.repo }
+    - src: percona-release.repo.j2
+      dst: /etc/yum.repos.d/percona-release.repo
   when: percona_yum is success
 
 - name: Ensure that the percona gpg keys are installed
