@@ -15,13 +15,14 @@ None
 Available variables are listed below, along with default values:
 
     percona_arch: noarch
-    percona_baseurl: "https://www.percona.com/redir/downloads/{{ percona_pkg }}/redhat/{{ percona_ver }}-{{ percona_rel }}"
+    percona_baseurl: "https://repo.percona.com/yum"
     percona_disablerepo: []
     percona_enablerepo: []
-    percona_fetch: "{{ percona_baseurl }}/{{ percona_release }}.{{ percona_arch }}.rpm"
+    percona_fetch: >-
+      {{ percona_baseurl }}/{{ percona_release }}.{{ percona_arch }}.rpm
     percona_packages: []
     percona_pkg: percona-release
-    percona_rel: 6
+    percona_rel: 9
     percona_release: "{{ percona_pkg }}-{{ percona_ver }}-{{ percona_rel }}"
     percona_repository_experimental_basearch: false
     percona_repository_experimental_noarch: false
@@ -32,7 +33,7 @@ Available variables are listed below, along with default values:
     percona_repository_testing_basearch: false
     percona_repository_testing_noarch: false
     percona_repository_testing_source: false
-    percona_ver: 0.1
+    percona_ver: 1.0
 
 All repositories are disabled by default.
 

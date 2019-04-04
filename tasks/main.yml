@@ -11,7 +11,7 @@
   tags: percona
   get_url:
     dest: "{{ percona_tempfile.path }}"
-    force: yes
+    force: true
     url: "{{ percona_fetch }}"
   register: percona_get_url
   when: percona_tempfile is success
@@ -20,10 +20,9 @@
   tags: percona
   become: true
   yum:
-    name: "{{ item }}"
+    name: "{{ percona_tempfile.path }}"
     state: present
   register: percona_yum
-  with_items: "{{ percona_tempfile.path }}"
   when: percona_get_url is success
 
 - name: Attempting to purge temporary package from the filesystem
@@ -45,7 +44,8 @@
     group: root
     mode: 0644
   with_items:
-    - { src: percona-release.repo.j2, dst: /etc/yum.repos.d/percona-release.repo }
+    - src: percona-release.repo.j2
+      dst: /etc/yum.repos.d/percona-release.repo
   when: percona_yum is success
 
 - name: Ensure that the percona gpg keys are installed
